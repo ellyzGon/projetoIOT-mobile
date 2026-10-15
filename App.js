@@ -24,10 +24,14 @@ const sensores = [
 
 export default function App() {
   const [tela, setTela] = useState('Sensores');
+  const [listaSensores, setListaSensores] = useState(sensores);
   const [filtro, setFiltro] = useState('Todos');
   const [busca, setBusca] = useState('');
 
-  const listaFiltrada = sensores.filter((sensor) => {
+  const ativos = listaSensores.filter((sensor) => sensor.ativo).length;
+  const inativos = listaSensores.length - ativos;
+
+  const listaFiltrada = listaSensores.filter((sensor) => {
     const correspondeFiltro =
       filtro === 'Todos' ||
       (filtro === 'Ativos' && sensor.ativo) ||
@@ -40,9 +44,26 @@ export default function App() {
     return correspondeFiltro && correspondeBusca;
   });
 
+  function alternarSensor(id) {
+    setListaSensores((listaAtual) =>
+      listaAtual.map((sensor) =>
+        sensor.id === id
+          ? { ...sensor, ativo: !sensor.ativo }
+          : sensor
+      )
+    );
+  }
+
   function CartaoSensor({ sensor }) {
     return (
-      <Pressable style={styles.sensor}>
+      <Pressable
+        style={styles.sensor}
+        onPress={() => alternarSensor(sensor.id)}
+        accessibilityRole="button"
+        accessibilityLabel={`${sensor.id}, ${sensor.tipo}, ${
+          sensor.ativo ? 'ativo' : 'inativo'
+        }. Toque para alterar o status.`}
+      >
         <View
           style={[
             styles.linhaStatus,
@@ -57,10 +78,10 @@ export default function App() {
           ]}
         >
           <Text
-            style={{
-              fontSize: 27,
-              color: sensor.ativo ? '#168766' : '#8A9DBB',
-            }}
+            style={[
+              styles.simboloSensor,
+              { color: sensor.ativo ? '#168766' : '#8A9DBB' },
+            ]}
           >
             {sensor.icone}
           </Text>
@@ -78,11 +99,10 @@ export default function App() {
           ]}
         >
           <Text
-            style={{
-              color: sensor.ativo ? '#079B78' : '#F04438',
-              fontSize: 10,
-              fontWeight: 'bold',
-            }}
+            style={[
+              styles.textoStatus,
+              { color: sensor.ativo ? '#079B78' : '#F04438' },
+            ]}
           >
             {'● ' + (sensor.ativo ? 'ATIVO' : 'INATIVO')}
           </Text>
@@ -112,7 +132,9 @@ export default function App() {
               <Text style={styles.nomeMarca}>VerdeSense</Text>
               <Text style={styles.pontoVerde}>●</Text>
             </View>
-            <Text style={styles.subtitulo}>CENTRAL DE MONITORAMENTO</Text>
+            <Text style={styles.subtitulo}>
+              CENTRAL DE MONITORAMENTO
+            </Text>
           </View>
 
           <Pressable
@@ -134,18 +156,23 @@ export default function App() {
               </Text>
 
               <View style={styles.resumo}>
-                <View>
+                <View style={styles.resumoTexto}>
                   <View style={styles.porcentagemLinha}>
-                    <Text style={styles.porcentagem}>90%</Text>
+                    <Text style={styles.porcentagem}>
+                      {listaSensores.length
+                        ? Math.round((ativos / listaSensores.length) * 100)
+                        : 0}%
+                    </Text>
                     <Text style={styles.online}>online agora</Text>
                   </View>
+
                   <Text style={styles.operando}>
                     ● Sistema operando normalmente
                   </Text>
                 </View>
 
                 <View style={styles.circulo}>
-                  <Text style={styles.numeroCirculo}>36</Text>
+                  <Text style={styles.numeroCirculo}>{ativos}</Text>
                   <Text style={styles.textoCirculo}>ATIVOS</Text>
                 </View>
               </View>
@@ -153,21 +180,37 @@ export default function App() {
               <View style={styles.estatisticas}>
                 <View style={styles.estatistica}>
                   <Text style={styles.numeroEstatistica}>40</Text>
-                  <Text style={styles.legendaEstatistica}>INSTALADOS</Text>
+                  <Text style={styles.legendaEstatistica}>
+                    INSTALADOS
+                  </Text>
                 </View>
 
                 <View style={styles.estatistica}>
-                  <Text style={[styles.numeroEstatistica, { color: '#65E2B9' }]}>
-                    36
+                  <Text
+                    style={[
+                      styles.numeroEstatistica,
+                      { color: '#65E2B9' },
+                    ]}
+                  >
+                    {ativos}
                   </Text>
-                  <Text style={styles.legendaEstatistica}>CONECTADOS</Text>
+                  <Text style={styles.legendaEstatistica}>
+                    CONECTADOS
+                  </Text>
                 </View>
 
                 <View style={styles.estatistica}>
-                  <Text style={[styles.numeroEstatistica, { color: '#FF8D80' }]}>
-                    4
+                  <Text
+                    style={[
+                      styles.numeroEstatistica,
+                      { color: '#FF8D80' },
+                    ]}
+                  >
+                    {inativos}
                   </Text>
-                  <Text style={styles.legendaEstatistica}>COM ALERTA</Text>
+                  <Text style={styles.legendaEstatistica}>
+                    COM ALERTA
+                  </Text>
                 </View>
               </View>
             </View>
@@ -185,16 +228,19 @@ export default function App() {
 
             <View style={styles.aviso}>
               <Text style={styles.avisoTexto}>
-                ●  Modo demonstração: conecte-se à mesma rede da API para
-                visualizar dados em tempo real.
+                ●  Modo demonstração: conecte-se à mesma rede da API
+                para visualizar dados em tempo real.
               </Text>
             </View>
 
             <View style={styles.tituloSecao}>
               <View>
                 <Text style={styles.rotuloSecao}>INVENTÁRIO</Text>
-                <Text style={styles.tituloLista}>Seus dispositivos</Text>
+                <Text style={styles.tituloLista}>
+                  Seus dispositivos
+                </Text>
               </View>
+
               <Text style={styles.resultados}>
                 {listaFiltrada.length} resultados
               </Text>
@@ -218,41 +264,57 @@ export default function App() {
                   >
                     {item}{' '}
                     {item === 'Todos'
-                      ? '40'
+                      ? listaSensores.length
                       : item === 'Ativos'
-                        ? '36'
-                        : '4'}
+                        ? ativos
+                        : inativos}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            {listaFiltrada.map((sensor) => (
-              <CartaoSensor key={sensor.id} sensor={sensor} />
-            ))}
+            {listaFiltrada.length > 0 ? (
+              listaFiltrada.map((sensor) => (
+                <CartaoSensor key={sensor.id} sensor={sensor} />
+              ))
+            ) : (
+              <Text style={styles.semResultados}>
+                Nenhum sensor encontrado.
+              </Text>
+            )}
+
+            <Text style={styles.dica}>
+              Toque em um sensor para ativá-lo ou desativá-lo.
+            </Text>
           </>
         ) : tela === 'Sincronizar' ? (
           <View style={styles.paginaAlternativa}>
             <Text style={styles.iconeAlternativo}>↻</Text>
-            <Text style={styles.tituloAlternativo}>Sincronizar sensores</Text>
+            <Text style={styles.tituloAlternativo}>
+              Sincronizar sensores
+            </Text>
             <Text style={styles.descricaoAlternativa}>
-              Os dados exibidos são de demonstração. A conexão com a API
-              será necessária para sincronizar os sensores reais.
+              Os dados são demonstrativos. A conexão com a API será
+              necessária para sincronizar os dispositivos reais.
             </Text>
             <Pressable
               style={styles.botaoVerde}
               onPress={() => setTela('Sensores')}
             >
-              <Text style={styles.textoBotaoVerde}>Voltar ao painel</Text>
+              <Text style={styles.textoBotaoVerde}>
+                Voltar ao painel
+              </Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.paginaAlternativa}>
             <Text style={styles.iconeAlternativo}>ⓘ</Text>
-            <Text style={styles.tituloAlternativo}>Sobre o VerdeSense</Text>
+            <Text style={styles.tituloAlternativo}>
+              Sobre o VerdeSense
+            </Text>
             <Text style={styles.descricaoAlternativa}>
-              Central de monitoramento de sensores para acompanhar
-              dispositivos, estados e alertas em um só lugar.
+              Central de monitoramento para acompanhar dispositivos,
+              estados e alertas em um só lugar.
             </Text>
           </View>
         )}
@@ -284,6 +346,7 @@ export default function App() {
                 {item.icone}
               </Text>
             </View>
+
             <Text
               style={[
                 styles.textoNavegacao,
@@ -383,6 +446,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 27,
+  },
+  resumoTexto: {
+    flex: 1,
+    paddingRight: 8,
   },
   porcentagemLinha: {
     flexDirection: 'row',
@@ -556,6 +623,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 14,
   },
+  simboloSensor: {
+    fontSize: 27,
+  },
   infoSensor: {
     flex: 1,
   },
@@ -575,10 +645,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 12,
   },
+  textoStatus: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   seta: {
     color: '#B7C9DE',
     fontSize: 26,
     marginRight: 4,
+  },
+  semResultados: {
+    color: '#8A9DBB',
+    fontSize: 15,
+    textAlign: 'center',
+    padding: 30,
+  },
+  dica: {
+    color: '#8A9DBB',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 20,
   },
   navegacao: {
     position: 'absolute',
