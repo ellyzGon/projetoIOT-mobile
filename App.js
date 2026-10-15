@@ -9,29 +9,73 @@ import {
   Pressable,
 } from 'react-native';
 
-const sensores = [
-  { id: 'S1', tipo: 'Luminosidade', ativo: false, icone: '♧' },
-  { id: 'S2', tipo: 'Luminosidade', ativo: true, icone: '♧' },
-  { id: 'S3', tipo: 'Infravermelho', ativo: true, icone: '☼' },
-  { id: 'S4', tipo: 'Umidade', ativo: false, icone: '♢' },
-  { id: 'S5', tipo: 'Infravermelho', ativo: true, icone: '☼' },
-  { id: 'S6', tipo: 'Infravermelho', ativo: true, icone: '☼' },
-  { id: 'S7', tipo: 'Luminosidade', ativo: true, icone: '♧' },
-  { id: 'S8', tipo: 'Umidade', ativo: true, icone: '♢' },
-  { id: 'S9', tipo: 'Luminosidade', ativo: true, icone: '♧' },
-  { id: 'S10', tipo: 'Infravermelho', ativo: true, icone: '☼' },
+// Dados dos 40 sensores recebidos da API.
+// Status 1 = ativo | Status 0 = inativo.
+
+const dadosSensores = [
+  ['S1', 'luminosidade', 0],
+  ['S2', 'luminosidade', 1],
+  ['S3', 'infravermelho', 1],
+  ['S4', 'umidade', 0],
+  ['S5', 'infravermelho', 1],
+  ['S6', 'infravermelho', 1],
+  ['S7', 'umidade', 1],
+  ['S8', 'infravermelho', 1],
+  ['S9', 'luminosidade', 1],
+  ['S10', 'luminosidade', 1],
+  ['S11', 'temperatura', 1],
+  ['S12', 'infravermelho', 1],
+  ['S13', 'rfid', 1],
+  ['S14', 'temperatura', 1],
+  ['S15', 'infravermelho', 1],
+  ['S16', 'luminosidade', 1],
+  ['S17', 'umidade', 1],
+  ['S18', 'temperatura', 1],
+  ['S19', 'luminosidade', 0],
+  ['S20', 'luminosidade', 1],
+  ['S21', 'rfid', 1],
+  ['S22', 'infravermelho', 1],
+  ['S23', 'rfid', 1],
+  ['S24', 'rfid', 1],
+  ['S25', 'rfid', 1],
+  ['S26', 'umidade', 1],
+  ['S27', 'umidade', 1],
+  ['S28', 'rfid', 1],
+  ['S29', 'temperatura', 1],
+  ['S30', 'rfid', 1],
+  ['S31', 'temperatura', 1],
+  ['S32', 'umidade', 1],
+  ['S33', 'temperatura', 1],
+  ['S34', 'temperatura', 0],
+  ['S35', 'umidade', 1],
+  ['S36', 'infravermelho', 1],
+  ['S37', 'temperatura', 1],
+  ['S38', 'luminosidade', 1],
+  ['S39', 'rfid', 1],
+  ['S40', 'luminosidade', 1],
 ];
+
+const sensoresIniciais = dadosSensores.map(([codigo, tipo, status]) => ({
+  id: codigo,
+  tipo,
+  ativo: status === 1,
+  icone:
+    tipo === 'luminosidade' ? '☼' :
+    tipo === 'infravermelho' ? '◎' :
+    tipo === 'umidade' ? '♢' :
+    tipo === 'temperatura' ? '♨' : '▦',
+}));
 
 export default function App() {
   const [tela, setTela] = useState('Sensores');
-  const [listaSensores, setListaSensores] = useState(sensores);
+  const [listaSensores, setListaSensores] = useState(sensoresIniciais);
   const [filtro, setFiltro] = useState('Todos');
   const [busca, setBusca] = useState('');
 
-  const ativos = listaSensores.filter((sensor) => sensor.ativo).length;
+  const ativos = listaSensores.filter(sensor => sensor.ativo).length;
   const inativos = listaSensores.length - ativos;
 
-  const listaFiltrada = listaSensores.filter((sensor) => {
+  const listaFiltrada = listaSensores.filter(sensor => {
     const correspondeFiltro =
       filtro === 'Todos' ||
       (filtro === 'Ativos' && sensor.ativo) ||
@@ -45,8 +89,8 @@ export default function App() {
   });
 
   function alternarSensor(id) {
-    setListaSensores((listaAtual) =>
-      listaAtual.map((sensor) =>
+    setListaSensores(listaAtual =>
+      listaAtual.map(sensor =>
         sensor.id === id
           ? { ...sensor, ativo: !sensor.ativo }
           : sensor
@@ -67,20 +111,30 @@ export default function App() {
         <View
           style={[
             styles.linhaStatus,
-            { backgroundColor: sensor.ativo ? '#10B981' : '#FF665B' },
+            {
+              backgroundColor: sensor.ativo
+                ? '#10B981'
+                : '#FF665B',
+            },
           ]}
         />
 
         <View
           style={[
             styles.icone,
-            { backgroundColor: sensor.ativo ? '#E7F7F1' : '#F0F4F8' },
+            {
+              backgroundColor: sensor.ativo
+                ? '#E7F7F1'
+                : '#F0F4F8',
+            },
           ]}
         >
           <Text
             style={[
               styles.simboloSensor,
-              { color: sensor.ativo ? '#168766' : '#8A9DBB' },
+              {
+                color: sensor.ativo ? '#168766' : '#8A9DBB',
+              },
             ]}
           >
             {sensor.icone}
@@ -89,19 +143,25 @@ export default function App() {
 
         <View style={styles.infoSensor}>
           <Text style={styles.nomeSensor}>{sensor.id}</Text>
-          <Text style={styles.tipoSensor}>{sensor.tipo}</Text>
+          <Text style={styles.tipoSensor}>
+            {sensor.tipo.charAt(0).toUpperCase() + sensor.tipo.slice(1)}
+          </Text>
         </View>
 
         <View
           style={[
             styles.status,
-            { backgroundColor: sensor.ativo ? '#E7F9F3' : '#FFF0EE' },
+            {
+              backgroundColor: sensor.ativo ? '#E7F9F3' : '#FFF0EE',
+            },
           ]}
         >
           <Text
             style={[
               styles.textoStatus,
-              { color: sensor.ativo ? '#079B78' : '#F04438' },
+              {
+                color: sensor.ativo ? '#079B78' : '#F04438',
+              },
             ]}
           >
             {'● ' + (sensor.ativo ? 'ATIVO' : 'INATIVO')}
@@ -160,7 +220,9 @@ export default function App() {
                   <View style={styles.porcentagemLinha}>
                     <Text style={styles.porcentagem}>
                       {listaSensores.length
-                        ? Math.round((ativos / listaSensores.length) * 100)
+                        ? Math.round(
+                            (ativos / listaSensores.length) * 100
+                          )
                         : 0}%
                     </Text>
                     <Text style={styles.online}>online agora</Text>
@@ -179,7 +241,9 @@ export default function App() {
 
               <View style={styles.estatisticas}>
                 <View style={styles.estatistica}>
-                  <Text style={styles.numeroEstatistica}>40</Text>
+                  <Text style={styles.numeroEstatistica}>
+                    {listaSensores.length}
+                  </Text>
                   <Text style={styles.legendaEstatistica}>
                     INSTALADOS
                   </Text>
@@ -228,8 +292,8 @@ export default function App() {
 
             <View style={styles.aviso}>
               <Text style={styles.avisoTexto}>
-                ●  Modo demonstração: conecte-se à mesma rede da API
-                para visualizar dados em tempo real.
+                ●  Modo demonstração: os dados iniciais reproduzem
+                o retorno fornecido da API.
               </Text>
             </View>
 
@@ -247,7 +311,7 @@ export default function App() {
             </View>
 
             <View style={styles.filtros}>
-              {['Todos', 'Ativos', 'Inativos'].map((item) => (
+              {['Todos', 'Ativos', 'Inativos'].map(item => (
                 <Pressable
                   key={item}
                   style={[
@@ -274,7 +338,7 @@ export default function App() {
             </View>
 
             {listaFiltrada.length > 0 ? (
-              listaFiltrada.map((sensor) => (
+              listaFiltrada.map(sensor => (
                 <CartaoSensor key={sensor.id} sensor={sensor} />
               ))
             ) : (
@@ -294,8 +358,8 @@ export default function App() {
               Sincronizar sensores
             </Text>
             <Text style={styles.descricaoAlternativa}>
-              Os dados são demonstrativos. A conexão com a API será
-              necessária para sincronizar os dispositivos reais.
+              Os estados apresentados são locais. Para sincronizar
+              alterações com os dispositivos reais, conecte a API.
             </Text>
             <Pressable
               style={styles.botaoVerde}
@@ -325,7 +389,7 @@ export default function App() {
           { nome: 'Sensores', icone: '▦' },
           { nome: 'Sincronizar', icone: '↻' },
           { nome: 'Sobre', icone: 'ⓘ' },
-        ].map((item) => (
+        ].map(item => (
           <Pressable
             key={item.nome}
             style={styles.itemNavegacao}
